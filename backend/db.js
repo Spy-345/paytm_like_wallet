@@ -21,6 +21,19 @@ const UserSchema = new mongoose.Schema({
   username: { type: String, required: true },
 });
 
+//Defining the Account Schema
+const AccountSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  balance: {
+    type: Number,
+    required: true,
+  },
+});
+
 //Schema Method to generate the password hash
 UserSchema.methods.createHash = async function (plainTextPassword) {
   const saltRounds = 10;
@@ -39,3 +52,6 @@ UserSchema.methods.validatePassword = async function (plainTextPassword) {
 
 //Creating the User Model/Table
 export const User = new mongoose.model("user", UserSchema);
+
+//Creating the Account Model/Table
+export const Account = new mongoose.model("account", AccountSchema);

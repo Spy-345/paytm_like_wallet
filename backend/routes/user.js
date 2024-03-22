@@ -1,6 +1,6 @@
-import express, { response } from "express";
+import express from "express";
 import z from "zod";
-import { User } from "../db.js";
+import { User, Account } from "../db.js";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../backend.config.js";
 import { authMiddleware } from "../middleware.js";
@@ -59,10 +59,19 @@ userRouter.post("/signup", async (req, res) => {
   //generating the JWT token for the user from the Newly Created UserId
   const userToken = jwt.sign({ userId }, JWT_SECRET);
 
+  const initialAccountBalance = 1 + Math.random() * 1000;
+
+  //Creating new Account for the new user
+  await Account.create({
+    userId,
+    balance: initialAccountBalance * 100,
+  });
+
   if (userToken && newUser) {
     return res.json({
       message: "User Created Successfully!",
       token: userToken,
+      user: newUser,
     });
   }
 });
@@ -81,9 +90,12 @@ userRouter.post("/signIn", async (req, res) => {
       message: "Invalid Username or Password!",
     });
   }
-  const user = await User.findOne({
-    username: req.body.username,
-  });
+  const user = await User.findOne(
+    {
+      username: req.body.username,
+    },
+    "firstName lastname password_hash"
+  );
 
   if (!user) {
     return res.status(411).json({
@@ -96,7 +108,7 @@ userRouter.post("/signIn", async (req, res) => {
       const accessToken = jwt.sign({ userId }, JWT_SECRET);
       console.log("User logged in Successfully!");
 
-      return res.status(200).json({ token: accessToken });
+      return res.status(200).json({ token: accessToken, user: user });
     } else {
       return res.status(411).json({
         message: "Incorrect password!",
@@ -112,7 +124,7 @@ const updatedDataSchema = z.object({
 });
 
 //Update the user Details
-userRouter.put("/", authMiddleware, async (req, res) => {
+userRouter.put("/update", authMiddleware, async (req, res) => {
   const { success, error, data } = updatedDataSchema.safeParse(req.body);
 
   if (error) {

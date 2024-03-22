@@ -4,7 +4,7 @@ import cors from "cors";
 import { rootRouter } from "./routes/index.js";
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 
 //Using the cors to allow the cross site connection
 app.use(cors());
