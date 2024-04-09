@@ -159,6 +159,22 @@ userRouter.put("/update", authMiddleware, async (req, res) => {
   }
 });
 
+userRouter.get("/singleUser", async (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    return;
+  }
+
+  try {
+    const user = await User.findOne({ _id: userId }).exec();
+    return res.status(200).json(user);
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ message: "Error getting the User Details!" });
+  }
+});
+
 //Filter the Users by their name
 userRouter.get("/bulk", async (req, res) => {
   const filter = req.query.filter || "";

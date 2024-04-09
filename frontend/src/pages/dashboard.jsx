@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
+import SendMoney from "../components/sendmoney";
 
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
@@ -10,19 +12,23 @@ export default function Dashboard() {
     lastName: "",
   });
   const [userbalance, setUserBalance] = useState("0.00");
-
+  const [isOpen, setIsOpen] = useState(false);
+  const [userId, setUserId] = useState("");
   const navigate = useNavigate();
+
+  console.log(userId);
+
   // Fetch users
   useEffect(() => {
     const fetchUsers = async () => {
       const response = await fetch("/api/v1/user/bulk");
       const data = await response.json();
-      console.log(data);
       setUsers(data.users);
     };
     fetchUsers();
   }, []);
 
+  //Effect to Fetch the User balance
   useEffect(() => {
     const fetchBalance = async () => {
       const response = await fetch("/api/v1/account/balance", {
@@ -61,6 +67,10 @@ export default function Dashboard() {
     fetchUsers();
   }, [search]);
 
+  const friends = users.filter(
+    (user) => loggedUser.firstName !== user.firstName
+  );
+
   const User = ({ user }) => {
     return (
       <div className='flex flex-row justify-between items-center p-2 my-2 border border-solid border-gray-300 rounded-lg'>
@@ -74,7 +84,13 @@ export default function Dashboard() {
           </h2>
         </div>
         <div className='w-1/4'>
-          <button className='bg-green-500 text-white p-2 rounded-lg w-full'>
+          <button
+            className='bg-green-500 text-white p-2 rounded-lg w-full'
+            onClick={() => {
+              setIsOpen(true);
+              setUserId(user._id);
+            }}
+          >
             Pay
           </button>
         </div>
@@ -82,10 +98,14 @@ export default function Dashboard() {
     );
   };
 
+  User.propTypes = {
+    user: PropTypes.object.isRequired,
+  };
+
   return (
     <div
       className='w-1/2
-     bg-white min-h-screen text-slate-800 mx-auto font-medium'
+     bg-white h-screen text-slate-800 mx-auto font-medium'
     >
       <div className='flex flex-row justify-between p-2 my-2'>
         <div className='text-black font-bold'>
@@ -116,10 +136,16 @@ export default function Dashboard() {
         />
       </div>
       <div className='mx-2'>
-        {users.map((user) => (
-          <User key={user._id} user={user} />
-        ))}
+        {friends.map((user) => {
+          return <User key={user._id} user={user} />;
+        })}
       </div>
+      <SendMoney
+        name={loggedUser.firstName}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        userId={userId}
+      />
     </div>
   );
 }

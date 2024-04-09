@@ -43,7 +43,9 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
   if (!receiverAccount) {
     //Aborting the transaction
     await session.abortTransaction();
-    return res.status(400).json({ message: "Invalid Account!" });
+    return res
+      .status(400)
+      .json({ message: "Invalid Account!", success: false });
   }
 
   //If sender acount not found or sender has Low Account Balance
@@ -52,6 +54,7 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
     await session.abortTransaction();
     return res.status(400).json({
       message: "Insufficient Account Balance!",
+      success: false,
     });
   }
 
@@ -73,5 +76,7 @@ accountRouter.post("/transfer", authMiddleware, async (req, res) => {
 
   //Committing the transaction
   await session.commitTransaction();
-  return res.status(200).json({ message: "Transfer Successful!" });
+  return res
+    .status(200)
+    .json({ message: "Transfer Successful!", success: true });
 });

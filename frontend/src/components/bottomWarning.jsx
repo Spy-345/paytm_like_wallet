@@ -1,4 +1,12 @@
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
+
+//Prop Types for BottomWarning component
+BottomWarning.propTypes = {
+  label: PropTypes.string.isRequired,
+  to: PropTypes.string.isRequired,
+  page: PropTypes.string.isRequired,
+};
 
 export default function BottomWarning({ label, to, page }) {
   return (
